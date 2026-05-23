@@ -1,0 +1,7 @@
+com\sistema\clinica\PacienteServlet.class
+com\sistema\clinica\ConexionBD.class
+com\sistema\clinica\PracticanteServlet.class
+com\sistema\clinica\HistoriaServlet.class
+com\sistema\clinica\ConsultorioServlet.class
+com\sistema\clinica\CitaServlet.class
+com\sistema\clinica\EspecialidadServlet.class

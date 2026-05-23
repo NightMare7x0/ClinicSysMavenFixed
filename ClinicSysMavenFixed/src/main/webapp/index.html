@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClinicSys</title>
+  <link rel="stylesheet" href="clinica.css">
+</head>
+<body>
+
+<!-- ============================================================
+     TOAST CONTAINER
+============================================================ -->
+<div id="toast-container"></div>
+
+
+<!-- ============================================================
+     LOGIN SECTION
+============================================================ -->
+<div id="login-section">
+
+  <div class="login-left">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <span class="login-logo-text">ClinicSys</span>
+    </div>
+    <div class="login-hero">
+      <p class="login-eyebrow">Sistema de gestión clínica</p>
+      <h1 class="login-title">Gestión integral<br>para tu clínica</h1>
+      <p class="login-subtitle">Administra pacientes, citas, consultorios y expedientes clínicos desde una sola plataforma segura.</p>
+      <div class="login-stats">
+        <div class="login-stat"><div class="login-stat-value">6</div><div class="login-stat-label">Módulos activos</div></div>
+        <div class="login-stat"><div class="login-stat-value">5</div><div class="login-stat-label">Roles de acceso</div></div>
+        <div class="login-stat"><div class="login-stat-value">6+</div><div class="login-stat-label">Especialidades</div></div>
+        <div class="login-stat"><div class="login-stat-value">24/7</div><div class="login-stat-label">Disponibilidad</div></div>
+      </div>
+    </div>
+    <p class="login-footer">© 2026 ClinicSys · Todos los derechos reservados</p>
+  </div>
+
+  <div class="login-right">
+    <div class="login-form-wrap">
+      <div class="login-mobile-logo">
+        <div class="login-mobile-logo-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <span class="login-mobile-logo-text">ClinicSys</span>
+      </div>
+
+      <h2 class="login-heading">Bienvenido de nuevo</h2>
+      <p class="login-sub">Ingresa tus credenciales para acceder al sistema</p>
+
+      <div class="form-group">
+        <label for="username">Usuario</label>
+        <div class="input-group" style="margin-top:.375rem">
+          <span class="input-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          <input type="text" id="username" class="input" placeholder="admin, doctor, personal…">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <div class="input-group" style="margin-top:.375rem">
+          <span class="input-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          <input type="password" id="password" class="input" placeholder="Igual que el usuario">
+        </div>
+      </div>
+
+      <div id="login-error" class="login-error"></div>
+
+      <button class="btn btn-primary btn-full" onclick="login()">Iniciar sesión</button>
+
+      <div class="demo-box">
+        <p class="demo-box-title">Credenciales de demostración</p>
+        <div class="demo-chips">
+          <button class="demo-chip" onclick="autofill('admin')">admin</button>
+          <button class="demo-chip" onclick="autofill('doctor')">doctor</button>
+          <button class="demo-chip" onclick="autofill('personal')">personal</button>
+          <button class="demo-chip" onclick="autofill('paciente')">paciente</button>
+          <button class="demo-chip" onclick="autofill('practicante')">practicante</button>
+        </div>
+        <p class="demo-hint">Haz clic en un rol para autocompletar</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     MAIN APP
+============================================================ -->
+<div id="main-app">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-brand">
+        <div class="navbar-brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <span class="navbar-brand-text">ClinicSys</span>
+      </div>
+      <div class="navbar-right">
+        <span id="role-badge" class="badge badge-primary"></span>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h2 id="welcome-title" class="page-title"></h2>
+      <p  id="welcome-sub"   class="page-subtitle"></p>
+    </div>
+
+    <div id="stats-section" class="stats-grid" style="display:none">
+      <div class="stat-card stat-blue">
+        <div id="stat-pacientes" class="stat-value">0</div>
+        <div class="stat-label">Pacientes</div>
+      </div>
+      <div class="stat-card stat-orange">
+        <div id="stat-citas" class="stat-value">0</div>
+        <div class="stat-label">Citas</div>
+      </div>
+      <div class="stat-card stat-emerald">
+        <div id="stat-consultorios" class="stat-value">0</div>
+        <div class="stat-label">Consultorios</div>
+      </div>
+      <div class="stat-card stat-violet">
+        <div id="stat-especialidades" class="stat-value">0</div>
+        <div class="stat-label">Especialidades</div>
+      </div>
+    </div>
+
+    <div id="modules-container"></div>
+  </main>
+
+  <footer class="main-footer">ClinicSys © 2026 · Sistema de Gestión Clínica</footer>
+</div>
+
+
+<!-- ============================================================
+     MODAL: PACIENTES
+============================================================ -->
+<div class="modal-overlay" id="modal-pacientes">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <span class="modal-title">Registro de Pacientes</span>
+      <button class="modal-close" onclick="closeModal('pacientes')" aria-label="Cerrar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs-list">
+        <button class="tab-btn active" onclick="switchTab('pacientes','reg',this)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Registrar
+        </button>
+        <button class="tab-btn" onclick="switchTab('pacientes','vis',this)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Visualizar
+        </button>
+      </div>
+      <div id="pacientes-reg" class="tab-panel active">
+        <form onsubmit="submitPaciente(event)">
+          <div class="form-group"><label>Nombre completo</label><input type="text" id="pac-nombre" class="input" placeholder="Ej. María García" required style="margin-top:.375rem"></div>
+          <div class="form-group"><label>DNI</label><input type="text" id="pac-dni" class="input" placeholder="Ej. 12345678" required style="margin-top:.375rem"></div>
+          <div class="form-group"><label>Contacto de emergencia</label><input type="text" id="pac-contacto" class="input" placeholder="Ej. +51 999 123 456" required style="margin-top:.375rem"></div>
+          <button type="submit" class="btn btn-primary btn-full">Registrar paciente</button>
+        </form>
+      </div>
+      <div id="pacientes-vis" class="tab-panel">
+        <div id="pac-empty" class="empty-state"><div class="empty-state-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><p class="empty-state-text">No hay pacientes registrados aún</p></div>
+        <div id="pac-table" class="table-wrap" style="display:none"><table><thead><tr><th>Nombre</th><th>DNI</th><th>Contacto</th></tr></thead><tbody id="pac-tbody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: ESPECIALIDADES
+============================================================ -->
+<div class="modal-overlay" id="modal-especialidades">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">Registro de Especialidades</span>
+      <button class="modal-close" onclick="closeModal('especialidades')" aria-label="Cerrar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form onsubmit="submitEspecialidad(event)">
+        <div class="form-group">
+          <label>Seleccionar especialidad</label>
+          <select id="esp-select" class="input" required style="margin-top:.375rem">
+            <option value="">Elegir...</option>
+            <option>Medicina General</option><option>Obstetricia</option>
+            <option>Nutrición</option><option>Psicología</option>
+            <option>Rehabilitación</option><option>Fisioterapia</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Registrar especialidad</button>
+      </form>
+      <div id="esp-list-section" style="display:none;margin-top:1.25rem">
+        <p class="specialty-section-title">Registradas</p>
+        <div id="esp-tags" class="specialty-tags"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: CONSULTORIOS
+============================================================ -->
+<div class="modal-overlay" id="modal-consultorios">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <span class="modal-title">Registro de Consultorios</span>
+      <button class="modal-close" onclick="closeModal('consultorios')" aria-label="Cerrar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs-list">
+        <button class="tab-btn active" onclick="switchTab('consultorios','reg',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Registrar</button>
+        <button class="tab-btn" onclick="switchTab('consultorios','vis',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Visualizar</button>
+      </div>
+      <div id="consultorios-reg" class="tab-panel active">
+        <form onsubmit="submitConsultorio(event)">
+          <div class="form-group"><label>Especialidad</label><select id="cons-esp" class="input" required style="margin-top:.375rem"><option value="">Registra una especialidad primero</option></select></div>
+          <button type="submit" class="btn btn-primary btn-full">Registrar consultorio</button>
+        </form>
+      </div>
+      <div id="consultorios-vis" class="tab-panel">
+        <div id="cons-empty" class="empty-state"><div class="empty-state-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><p class="empty-state-text">No hay consultorios registrados aún</p></div>
+        <div id="cons-table" class="table-wrap" style="display:none"><table><thead><tr><th>N°</th><th>Especialidad</th></tr></thead><tbody id="cons-tbody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: CITAS
+============================================================ -->
+<div class="modal-overlay" id="modal-citas">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <span class="modal-title">Registro de Citas</span>
+      <button class="modal-close" onclick="closeModal('citas')" aria-label="Cerrar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs-list">
+        <button class="tab-btn active" onclick="switchTab('citas','reg',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Registrar</button>
+        <button class="tab-btn" onclick="switchTab('citas','vis',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Visualizar</button>
+      </div>
+      <div id="citas-reg" class="tab-panel active">
+        <form onsubmit="submitCita(event)">
+          <div class="form-group"><label>Paciente</label><select id="cita-pac" class="input" required style="margin-top:.375rem"><option value="">Registra un paciente primero</option></select></div>
+          <div class="form-group"><label>Especialidad</label><select id="cita-esp" class="input" required style="margin-top:.375rem"><option value="">Registra una especialidad primero</option></select></div>
+          <div class="form-group"><label>Consultorio</label><select id="cita-cons" class="input" required style="margin-top:.375rem"><option value="">Registra un consultorio primero</option></select></div>
+          <div class="form-group"><label>Doctor</label><input type="text" id="cita-doc" class="input" placeholder="Nombre del doctor" required style="margin-top:.375rem"></div>
+          <div class="form-row">
+            <div class="form-group"><label>Fecha</label><input type="date" id="cita-fecha" class="input" required style="margin-top:.375rem"></div>
+            <div class="form-group"><label>Hora</label><input type="time" id="cita-hora" class="input" required style="margin-top:.375rem"></div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Registrar cita</button>
+        </form>
+      </div>
+      <div id="citas-vis" class="tab-panel">
+        <div id="citas-empty" class="empty-state"><div class="empty-state-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><p class="empty-state-text">No hay citas registradas aún</p></div>
+        <div id="citas-table" class="table-wrap" style="display:none"><table><thead><tr><th>Paciente</th><th>Consultorio</th><th>Doctor</th><th>Fecha</th><th>Hora</th></tr></thead><tbody id="citas-tbody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: HISTORIA CLÍNICA
+============================================================ -->
+<div class="modal-overlay" id="modal-historia">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <span class="modal-title">Historia Clínica</span>
+      <button class="modal-close" onclick="closeModal('historia')" aria-label="Cerrar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs-list">
+        <button class="tab-btn active" onclick="switchTab('historia','reg',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Registrar</button>
+        <button class="tab-btn" onclick="switchTab('historia','vis',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Visualizar</button>
+      </div>
+      <div id="historia-reg" class="tab-panel active">
+        <form onsubmit="submitHistoria(event)">
+          <div class="form-group"><label>Paciente</label><select id="hist-pac" class="input" required style="margin-top:.375rem"><option value="">Registra un paciente primero</option></select></div>
+          <div class="form-group"><label>Síntomas</label><textarea id="hist-sint" class="input" rows="3" placeholder="Describe los síntomas..." required style="margin-top:.375rem"></textarea></div>
+          <div class="form-group"><label>Tratamiento recomendado</label><textarea id="hist-trat" class="input" rows="3" placeholder="Describe el tratamiento..." required style="margin-top:.375rem"></textarea></div>
+          <button type="submit" class="btn btn-primary btn-full">Guardar historia clínica</button>
+        </form>
+      </div>
+      <div id="historia-vis" class="tab-panel">
+        <div id="hist-empty" class="empty-state"><div class="empty-state-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><p class="empty-state-text">No hay historias clínicas registradas aún</p></div>
+        <div id="hist-table" class="table-wrap" style="display:none"><table><thead><tr><th>Paciente</th><th>Síntomas</th><th>Tratamiento</th></tr></thead><tbody id="hist-tbody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: PRACTICANTES
+============================================================ -->
+<div class="modal-overlay" id="modal-practicantes">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <span class="modal-title">Registro de Practicantes</span>
+      <button class="modal-close" onclick="closeModal('practicantes')" aria-label="Cerrar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs-list">
+        <button class="tab-btn active" onclick="switchTab('practicantes','reg',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Registrar</button>
+        <button class="tab-btn" onclick="switchTab('practicantes','vis',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Visualizar</button>
+      </div>
+      <div id="practicantes-reg" class="tab-panel active">
+        <form onsubmit="submitPracticante(event)">
+          <div class="form-group"><label>Nombre completo</label><input type="text" id="prac-nombre" class="input" placeholder="Nombre del practicante" required style="margin-top:.375rem"></div>
+          <div class="form-group"><label>DNI</label><input type="text" id="prac-dni" class="input" placeholder="Ej. 87654321" required style="margin-top:.375rem"></div>
+          <div class="form-group"><label>Doctor supervisor</label><input type="text" id="prac-sup" class="input" placeholder="Nombre del supervisor" required style="margin-top:.375rem"></div>
+          <div class="form-group"><label>Especialidad</label><select id="prac-esp" class="input" required style="margin-top:.375rem"><option value="">Registra una especialidad primero</option></select></div>
+          <button type="submit" class="btn btn-primary btn-full">Registrar practicante</button>
+        </form>
+      </div>
+      <div id="practicantes-vis" class="tab-panel">
+        <div id="prac-empty" class="empty-state"><div class="empty-state-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><p class="empty-state-text">No hay practicantes registrados aún</p></div>
+        <div id="prac-table" class="table-wrap" style="display:none"><table><thead><tr><th>Nombre</th><th>DNI</th><th>Supervisor</th><th>Especialidad</th></tr></thead><tbody id="prac-tbody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="clinica.js"></script>
+</body>
+</html>
