@@ -1,0 +1,60 @@
+```
+# Compiled and build artifacts
+*.class
+*.o
+*.obj
+*.out
+build/
+target/
+
+# Dependencies
+.m2/
+.gradle/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Editors
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Package manager
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE specific
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Maven
+.mvn/
+bin/
+*.jar
+*.war
+*.ear
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*~
+*.bak
+*.backup
+```
