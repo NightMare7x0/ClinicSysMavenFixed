@@ -1,6 +1,6 @@
 package com.sistema.clinica.dao;
 
-import com.sistema.clinica.model.Pacticante;
+import com.sistema.clinica.model.Practicante;
 import com.sistema.clinica.ConexionBD;
 import java.sql.*;
 import java.util.ArrayList;
