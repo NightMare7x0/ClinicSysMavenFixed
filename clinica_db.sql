@@ -54,9 +54,29 @@ CREATE TABLE IF NOT EXISTS practicante (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     nombre       VARCHAR(150) NOT NULL,
     dni          VARCHAR(20)  NOT NULL UNIQUE,
-    supervisor   VARCHAR(150),
-    especialidad VARCHAR(100)
+    supervisor   INT,  -- Ahora es FK a doctor
+    especialidad VARCHAR(100),
+    FOREIGN KEY (supervisor) REFERENCES doctor(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Nueva tabla doctor
+CREATE TABLE IF NOT EXISTS doctor (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    nombre          VARCHAR(150) NOT NULL,
+    dni             VARCHAR(20)  NOT NULL UNIQUE,
+    telefono        VARCHAR(20),
+    id_especialidad INT,
+    FOREIGN KEY (id_especialidad) REFERENCES especialidad(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Modificar tabla cita para usar doctor como FK
+ALTER TABLE cita DROP COLUMN doctor;
+ALTER TABLE cita ADD COLUMN id_doctor INT;
+ALTER TABLE cita ADD CONSTRAINT fk_cita_doctor FOREIGN KEY (id_doctor) REFERENCES doctor(id);
+
+-- Modificar tabla historia para incluir doctor asignado
+ALTER TABLE historia ADD COLUMN id_doctor INT;
+ALTER TABLE historia ADD CONSTRAINT fk_historia_doctor FOREIGN KEY (id_doctor) REFERENCES doctor(id);
 
 -- ------------------------------------------------------------
 --  STORED PROCEDURES
@@ -198,7 +218,7 @@ DELIMITER $$
 CREATE PROCEDURE sp_registrar_practicante(
     IN  p_nombre      VARCHAR(150),
     IN  p_dni         VARCHAR(20),
-    IN  p_supervisor  VARCHAR(150),
+    IN  p_supervisor  INT,
     IN  p_especialidad VARCHAR(100),
     OUT p_id          INT,
     OUT p_mensaje     VARCHAR(255)
@@ -215,6 +235,346 @@ BEGIN
 
     SET p_id      = LAST_INSERT_ID();
     SET p_mensaje = CONCAT('Practicante registrado con ID: ', p_id);
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+-- STORED PROCEDURES PARA DOCTOR
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_registrar_doctor;
+DELIMITER $$
+CREATE PROCEDURE sp_registrar_doctor(
+    IN  p_nombre          VARCHAR(150),
+    IN  p_dni             VARCHAR(20),
+    IN  p_telefono        VARCHAR(20),
+    IN  p_id_especialidad INT,
+    OUT p_id              INT,
+    OUT p_mensaje         VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_id      = -1;
+        SET p_mensaje = 'Error al registrar doctor (DNI puede estar duplicado)';
+    END;
+
+    INSERT INTO doctor(nombre, dni, telefono, id_especialidad)
+    VALUES (p_nombre, p_dni, p_telefono, p_id_especialidad);
+
+    SET p_id      = LAST_INSERT_ID();
+    SET p_mensaje = CONCAT('Doctor registrado con ID: ', p_id);
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_actualizar_doctor;
+DELIMITER $$
+CREATE PROCEDURE sp_actualizar_doctor(
+    IN  p_id              INT,
+    IN  p_nombre          VARCHAR(150),
+    IN  p_dni             VARCHAR(20),
+    IN  p_telefono        VARCHAR(20),
+    IN  p_id_especialidad INT,
+    OUT p_mensaje         VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al actualizar doctor';
+    END;
+
+    UPDATE doctor 
+    SET nombre = p_nombre, dni = p_dni, telefono = p_telefono, id_especialidad = p_id_especialidad
+    WHERE id = p_id;
+
+    SET p_mensaje = 'Doctor actualizado correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_eliminar_doctor;
+DELIMITER $$
+CREATE PROCEDURE sp_eliminar_doctor(
+    IN  p_id        INT,
+    OUT p_mensaje   VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al eliminar doctor (tiene registros relacionados)';
+    END;
+
+    DELETE FROM doctor WHERE id = p_id;
+    SET p_mensaje = 'Doctor eliminado correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+-- STORED PROCEDURES PARA ACTUALIZAR Y ELIMINAR OTRAS ENTIDADES
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_actualizar_especialidad;
+DELIMITER $$
+CREATE PROCEDURE sp_actualizar_especialidad(
+    IN  p_id        INT,
+    IN  p_nombre    VARCHAR(100),
+    OUT p_mensaje   VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al actualizar especialidad (nombre duplicado)';
+    END;
+
+    UPDATE especialidad SET nombre = p_nombre WHERE id = p_id;
+    SET p_mensaje = 'Especialidad actualizada correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_eliminar_especialidad;
+DELIMITER $$
+CREATE PROCEDURE sp_eliminar_especialidad(
+    IN  p_id        INT,
+    OUT p_mensaje   VARCHAR(255)
+)
+BEGIN
+    DECLARE v_count INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al eliminar especialidad';
+    END;
+
+    SELECT COUNT(*) INTO v_count FROM doctor WHERE id_especialidad = p_id;
+    IF v_count > 0 THEN
+        SET p_mensaje = 'No se puede eliminar: hay doctores asignados';
+    ELSE
+        DELETE FROM especialidad WHERE id = p_id;
+        SET p_mensaje = 'Especialidad eliminada correctamente';
+    END IF;
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_actualizar_paciente;
+DELIMITER $$
+CREATE PROCEDURE sp_actualizar_paciente(
+    IN  p_id        INT,
+    IN  p_nombre    VARCHAR(150),
+    IN  p_dni       VARCHAR(20),
+    IN  p_contacto  VARCHAR(100),
+    OUT p_mensaje   VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al actualizar paciente (DNI duplicado)';
+    END;
+
+    UPDATE paciente SET nombre = p_nombre, dni = p_dni, contacto = p_contacto WHERE id = p_id;
+    SET p_mensaje = 'Paciente actualizado correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_eliminar_paciente;
+DELIMITER $$
+CREATE PROCEDURE sp_eliminar_paciente(
+    IN  p_id        INT,
+    OUT p_mensaje   VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al eliminar paciente (tiene registros relacionados)';
+    END;
+
+    DELETE FROM paciente WHERE id = p_id;
+    SET p_mensaje = 'Paciente eliminado correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_actualizar_consultorio;
+DELIMITER $$
+CREATE PROCEDURE sp_actualizar_consultorio(
+    IN  p_id              INT,
+    IN  p_numero          INT,
+    IN  p_id_especialidad INT,
+    OUT p_mensaje         VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al actualizar consultorio';
+    END;
+
+    UPDATE consultorio SET numero = p_numero, id_especialidad = p_id_especialidad WHERE id = p_id;
+    SET p_mensaje = 'Consultorio actualizado correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_eliminar_consultorio;
+DELIMITER $$
+CREATE PROCEDURE sp_eliminar_consultorio(
+    IN  p_id        INT,
+    OUT p_mensaje   VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al eliminar consultorio (tiene citas relacionadas)';
+    END;
+
+    DELETE FROM consultorio WHERE id = p_id;
+    SET p_mensaje = 'Consultorio eliminado correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_actualizar_cita;
+DELIMITER $$
+CREATE PROCEDURE sp_actualizar_cita(
+    IN  p_id             INT,
+    IN  p_id_paciente    INT,
+    IN  p_id_consultorio INT,
+    IN  p_id_doctor      INT,
+    IN  p_fecha          DATE,
+    IN  p_hora           TIME,
+    OUT p_mensaje        VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al actualizar cita';
+    END;
+
+    UPDATE cita 
+    SET id_paciente = p_id_paciente, id_consultorio = p_id_consultorio, 
+        id_doctor = p_id_doctor, fecha = p_fecha, hora = p_hora
+    WHERE id = p_id;
+
+    SET p_mensaje = 'Cita actualizada correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_eliminar_cita;
+DELIMITER $$
+CREATE PROCEDURE sp_eliminar_cita(
+    IN  p_id        INT,
+    OUT p_mensaje   VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al eliminar cita';
+    END;
+
+    DELETE FROM cita WHERE id = p_id;
+    SET p_mensaje = 'Cita eliminada correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_actualizar_historia;
+DELIMITER $$
+CREATE PROCEDURE sp_actualizar_historia(
+    IN  p_id           INT,
+    IN  p_id_paciente  INT,
+    IN  p_id_doctor    INT,
+    IN  p_sintomas     TEXT,
+    IN  p_tratamiento  TEXT,
+    OUT p_mensaje      VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al actualizar historia clínica';
+    END;
+
+    UPDATE historia 
+    SET id_paciente = p_id_paciente, id_doctor = p_id_doctor, 
+        sintomas = p_sintomas, tratamiento = p_tratamiento
+    WHERE id = p_id;
+
+    SET p_mensaje = 'Historia clínica actualizada correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_eliminar_historia;
+DELIMITER $$
+CREATE PROCEDURE sp_eliminar_historia(
+    IN  p_id        INT,
+    OUT p_mensaje   VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al eliminar historia clínica';
+    END;
+
+    DELETE FROM historia WHERE id = p_id;
+    SET p_mensaje = 'Historia clínica eliminada correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_actualizar_practicante;
+DELIMITER $$
+CREATE PROCEDURE sp_actualizar_practicante(
+    IN  p_id           INT,
+    IN  p_nombre       VARCHAR(150),
+    IN  p_dni          VARCHAR(20),
+    IN  p_supervisor   INT,
+    IN  p_especialidad VARCHAR(100),
+    OUT p_mensaje      VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al actualizar practicante';
+    END;
+
+    UPDATE practicante 
+    SET nombre = p_nombre, dni = p_dni, supervisor = p_supervisor, especialidad = p_especialidad
+    WHERE id = p_id;
+
+    SET p_mensaje = 'Practicante actualizado correctamente';
+END$$
+DELIMITER ;
+
+-- ------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_eliminar_practicante;
+DELIMITER $$
+CREATE PROCEDURE sp_eliminar_practicante(
+    IN  p_id        INT,
+    OUT p_mensaje   VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_mensaje = 'Error al eliminar practicante';
+    END;
+
+    DELETE FROM practicante WHERE id = p_id;
+    SET p_mensaje = 'Practicante eliminado correctamente';
 END$$
 DELIMITER ;
 

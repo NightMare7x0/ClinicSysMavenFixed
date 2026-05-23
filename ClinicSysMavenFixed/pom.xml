@@ -33,6 +33,13 @@
             <version>9.1.0</version>
         </dependency>
 
+        <!-- JSON org para manejo de JSON -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20231013</version>
+        </dependency>
+
     </dependencies>
 
     <build>
